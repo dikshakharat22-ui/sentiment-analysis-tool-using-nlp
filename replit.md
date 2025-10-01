@@ -24,11 +24,13 @@ This is a web-based NLP Sentiment Analysis and Recommendation System built from 
 
 ## Features
 1. **Interactive Sentiment Analysis Tool**: Users can input text and get real-time sentiment analysis with polarity and subjectivity scores
-2. **Project Information Display**: Comprehensive presentation of the research project including:
+2. **File Upload Analysis**: Upload documents (TXT, PDF, DOCX, PPTX, PNG, JPG, JPEG) to extract text and analyze sentiment with drag-and-drop support
+3. **Project Information Display**: Comprehensive presentation of the research project including:
    - Datasets used (IMDB Reviews, Tweets)
    - ML models (Random Forest, Logistic Regression)
    - Deep Learning models (RNN, AvgNet, CNN)
    - Recommendation system details
+   - Advanced recommendation system project ideas
    - Key findings and results
 
 ## Running the Project
@@ -45,6 +47,10 @@ This is a web-based NLP Sentiment Analysis and Recommendation System built from 
 - Created responsive web interface with gradient design
 - Configured development workflow and deployment settings
 - Downloaded necessary NLTK corpora for TextBlob
+- Added file upload feature with support for TXT, PDF, DOCX, PPTX, PNG, JPG, JPEG
+- Implemented text extraction from multiple file formats including OCR for images
+- Added advanced recommendation system project ideas to the website
+- Enhanced error handling and security (image size limits, proper encoding fallbacks)
 
 ## Notes
 - The sentiment analysis uses TextBlob's pre-trained models
