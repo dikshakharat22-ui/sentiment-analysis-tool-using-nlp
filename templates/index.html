@@ -176,6 +176,61 @@
             margin: 15px 0;
             border-radius: 4px;
         }
+
+        .file-upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .file-upload-area:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+
+        .file-upload-area.dragover {
+            border-color: #667eea;
+            background: #e7f3ff;
+        }
+
+        .file-upload-area input[type="file"] {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .file-types {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .file-name {
+            margin-top: 15px;
+            padding: 10px;
+            background: #e7f3ff;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .extracted-text {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            text-align: left;
+            font-size: 0.9em;
+            white-space: pre-wrap;
+        }
     </style>
 </head>
 <body>
@@ -196,6 +251,31 @@
                 <div class="sentiment-badge" id="sentimentBadge"></div>
                 <p><strong>Polarity:</strong> <span id="polarity"></span> (Range: -1 to +1)</p>
                 <p><strong>Subjectivity:</strong> <span id="subjectivity"></span> (Range: 0 to 1)</p>
+            </div>
+        </div>
+
+        <div class="analyzer">
+            <h2>📁 Analyze File</h2>
+            <p>Upload a document to extract and analyze its sentiment:</p>
+            
+            <div class="file-upload-area" id="fileUploadArea" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">📄</div>
+                <p><strong>Click to upload</strong> or drag and drop your file here</p>
+                <div class="file-types">
+                    Supported: TXT, PDF, DOCX, PPTX, PNG, JPG, JPEG
+                </div>
+                <input type="file" id="fileInput" accept=".txt,.pdf,.docx,.pptx,.png,.jpg,.jpeg">
+            </div>
+            
+            <div id="fileName" class="file-name"></div>
+            
+            <div id="fileResult" class="result">
+                <h3>File Analysis Result:</h3>
+                <p><strong>File:</strong> <span id="uploadedFileName"></span></p>
+                <div class="sentiment-badge" id="fileSentimentBadge"></div>
+                <p><strong>Polarity:</strong> <span id="filePolarity"></span> (Range: -1 to +1)</p>
+                <p><strong>Subjectivity:</strong> <span id="fileSubjectivity"></span> (Range: 0 to 1)</p>
+                <div class="extracted-text" id="extractedText"></div>
             </div>
         </div>
 
@@ -389,6 +469,75 @@
                 analyzeSentiment();
             }
         });
+
+        const fileInput = document.getElementById('fileInput');
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const fileName = document.getElementById('fileName');
+        const fileResult = document.getElementById('fileResult');
+
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                uploadFile(this.files[0]);
+            }
+        });
+
+        fileUploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.add('dragover');
+        });
+
+        fileUploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.remove('dragover');
+        });
+
+        fileUploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files && files[0]) {
+                uploadFile(files[0]);
+            }
+        });
+
+        async function uploadFile(file) {
+            fileName.textContent = `Selected: ${file.name}`;
+            fileName.style.display = 'block';
+            fileResult.classList.remove('show');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/analyze-file', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('uploadedFileName').textContent = data.filename;
+                    document.getElementById('fileSentimentBadge').textContent = `${data.emoji} ${data.sentiment}`;
+                    document.getElementById('filePolarity').textContent = data.polarity;
+                    document.getElementById('fileSubjectivity').textContent = data.subjectivity;
+                    
+                    if (data.extracted_text) {
+                        document.getElementById('extractedText').innerHTML = '<strong>Extracted Text Preview:</strong><br>' + data.extracted_text;
+                    }
+                    
+                    fileResult.classList.add('show');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error uploading file: ' + error.message);
+            }
+        }
     </script>
 </body>
 </html>
